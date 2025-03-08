@@ -3757,6 +3757,14 @@ bot.launch()
   .then(() => console.log('Bot started'))
   .catch(err => console.error('Error starting bot:', err));
 
+process.on("uncaughtException", (err) => {
+  console.error("Unhandled Exception:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
