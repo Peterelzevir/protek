@@ -7,6 +7,7 @@
 
 const { Telegraf, Markup, session } = require('telegraf');
 const mongoose = require('mongoose');
+const { setupGlobalErrorHandling, launchBotSafely } = require('./errorHandler');
 
 // ============= KONFIGURASI =============
 // Config harus berada di file terpisah: config.js
@@ -3752,20 +3753,15 @@ bot.on('message', messageHandler);
 bot.on('new_chat_members', welcomeHandler.handleNewMember);
 bot.on('left_chat_member', welcomeHandler.handleMemberLeft);
 
-// Launch the bot
-bot.launch()
-  .then(() => console.log('Bot started'))
-  .catch(err => console.error('Error starting bot:', err));
+// Setup error handling global
+setupGlobalErrorHandling(bot);
 
-process.on("uncaughtException", (err) => {
-  console.error("Unhandled Exception:", err);
-});
+// Launch bot dengan fitur restart otomatis
+launchBotSafely(bot)
+  .then(() => console.log('Bot berhasil dimulai dengan error handling'))
+  .catch(err => console.error('Error fatal saat memulai bot:', err));
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-});
-
-// Enable graceful stop
+// Tetap pertahankan penanganan SIGINT dan SIGTERM
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
